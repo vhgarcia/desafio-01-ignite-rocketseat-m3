@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-return-assign */
 /* eslint-disable react/no-danger */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -9,11 +10,11 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Prismic from '@prismicio/client';
 import { useRouter } from 'next/router';
-import PrismicDom from 'prismic-dom';
 import { getPrismicClient } from '../../services/prismic';
 import Header from '../../components/Header';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import Comments from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
@@ -97,6 +98,8 @@ export default function Post({ post }: PostProps) {
               </article>
             );
           })}
+
+          <Comments />
         </div>
       </main>
     </>
@@ -138,7 +141,7 @@ export const getStaticProps: GetStaticProps = async context => {
       banner: {
         url: response.data.banner.url,
       },
-      content: response.data.content.map(content => {
+      content: response.data.content1.map(content => {
         return {
           heading: content.heading,
           body: [...content.body],
@@ -146,7 +149,7 @@ export const getStaticProps: GetStaticProps = async context => {
       }),
     },
   };
-  console.log(post);
+
   return {
     props: {
       post,
