@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Prismic from '@prismicio/client';
@@ -31,9 +31,13 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({
+  postsPagination,
+  preview,
+}: HomeProps): ReactElement {
   const formattedPost = postsPagination.results.map(post => {
     return {
       ...post,
@@ -115,16 +119,28 @@ export default function Home({ postsPagination }: HomeProps) {
             </button>
           )}
         </div>
+
+        {preview && (
+          <aside>
+            <Link href="/api/exit-preview">
+              <a className={commonStyles.preview}>Sair do modo Preview</a>
+            </Link>
+          </aside>
+        )}
       </main>
     </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async ({ preview = false }) => {
   const prismic = getPrismicClient();
+
   const postsResponse = await prismic.query(
-    [Prismic.predicates.at('document.type', 'posts')],
-    { pageSize: 1 }
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 3,
+      orderings: '[document.last_publication_date desc]',
+    }
   );
 
   const posts = postsResponse.results.map(post => {
@@ -145,6 +161,9 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 
   return {
-    props: { postsPagination },
+    props: {
+      postsPagination,
+      preview,
+    },
   };
 };
